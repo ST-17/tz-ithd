@@ -8,16 +8,19 @@ const page = ref(1);
 
 const companiesIsLoading = ref(false);
 const companies = ref([]);
-const allCompanies = ref([]);
 const getCompanies = async function () {
   companiesIsLoading.value = true;
 
   try {
-    const { data } = await axiosInstance.get("company");
+    const { data } = await axiosInstance.get("company", {
+      params: {
+        perPage: 4,
+        page: page.value,
+      },
+    });
     console.log(data);
 
-    allCompanies.value = [...data.items];
-    companies.value = allCompanies.value.slice(0, 5);
+    companies.value = data.items;
     pages.value = data.pages;
   } catch (error) {
     console.log(error);
@@ -27,8 +30,7 @@ const getCompanies = async function () {
 };
 
 watch(page, () => {
-  if (page.value === 1) companies.value = allCompanies.value.slice(0, 5);
-  else companies.value = allCompanies.value.slice(5);
+  getCompanies();
 });
 
 onMounted(() => {
@@ -72,7 +74,7 @@ onMounted(() => {
     <v-pagination
       v-model="page"
       class="my-6 mx-auto flex justify-center"
-      :length="2"
+      :length="pages"
       rounded="circle"
     ></v-pagination>
   </div>
